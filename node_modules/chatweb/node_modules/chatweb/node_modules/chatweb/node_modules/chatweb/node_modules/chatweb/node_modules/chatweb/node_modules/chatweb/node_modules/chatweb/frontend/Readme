@@ -1,0 +1,116 @@
+1. Landing Page / Splash Screen
+Purpose: This is the initial page that appears when the app loads. It typically shows the app logo or a loading screen.
+Components:
+App logo
+Option to log in or sign up
+2. Login Page
+Purpose: Allows users to log in to the app with their phone number or email.
+Components:
+Phone number or email input field
+Password field (if using email authentication)
+Login button
+Option for "Forgot Password"
+Option for "Sign Up"
+3. Sign Up Page
+Purpose: Allows new users to create an account.
+Components:
+Phone number or email input field
+Password field
+Confirm password field
+"Sign Up" button
+Option to log in if the user already has an account
+4. OTP Verification Page
+Purpose: Verifies the phone number/email after registration or login.
+Components:
+OTP input fields (or a single field to enter OTP)
+Button to submit OTP
+Option to resend OTP
+5. Home Page (Chat List)
+Purpose: Displays all active conversations or recent chats.
+Components:
+List of contacts or recent chats
+Chat previews with the last message and timestamp
+Search bar to find contacts
+Button to start a new chat (usually a "+" icon)
+Option to create groups or start group chats
+6. Chat Page (Individual or Group)
+Purpose: The core page for chatting with other users or groups.
+Components:
+Message input field
+Send button
+Chat history with messages
+Attachments option (images, documents, etc.)
+Voice note button
+Option to call (audio/video call)
+Contact/group details (profile picture, name, etc.)
+7. Profile Page
+Purpose: Allows users to view and edit their personal profile.
+Components:
+Profile picture
+Name field (editable)
+Status (editable)
+Phone number/email
+Option to log out
+Settings icon
+8. Settings Page
+Purpose: Allows users to configure various app settings.
+Components:
+Account settings (password change, privacy settings, etc.)
+Notification settings (mute chats, notification sound)
+Chat settings (themes, wallpaper, etc.)
+Privacy settings (who can see last seen, profile picture)
+Blocked users list
+Option to delete account
+9. Group Chat Settings Page
+Purpose: Allows users to manage group chats.
+Components:
+Group name
+Group icon
+List of group members
+Option to add/remove members
+Option to leave the group
+10. Search Page
+Purpose: Allows users to search for specific contacts or chats.
+Components:
+Search bar for users or group names
+Filter options (e.g., groups, individual chats)
+Search results with user or group names
+11. Notification Page
+Purpose: Displays recent notifications.
+Components:
+List of recent notifications for new messages, calls, etc.
+Option to mark notifications as read
+12. Call Page (Audio/Video Calls)
+Purpose: For managing audio or video calls.
+Components:
+Incoming/outgoing call screen
+Call duration
+Mute/unmute
+Switch camera (for video calls)
+End call button
+13. File Sharing/Media Page
+Purpose: Allows users to view and manage media (images, videos, documents) shared in chats.
+Components:
+Gallery or file list of media shared
+Option to download or share files
+Filter by file type (images, documents, etc.)
+Summary of Pages to Create:
+Landing Page (Splash screen)
+Login Page
+Sign Up Page
+OTP Verification Page
+Home Page (Chat list)
+Chat Page (Individual or group chat)
+Profile Page
+Settings Page
+Group Chat Settings Page
+Search Page
+Notification Page
+Call Page (Audio/Video Calls)
+File Sharing/Media Page
+Additional Features:
+Push Notifications: To notify users about new messages or calls.
+Real-Time Messaging: You’ll need real-time messaging with WebSockets (using libraries like Socket.IO).
+Data Encryption: Secure messaging with end-to-end encryption.
+Voice/Video Calls: You can use WebRTC for real-time communication.
+Storage for Media: Use cloud storage (like AWS S3) for storing images, videos, and files.
