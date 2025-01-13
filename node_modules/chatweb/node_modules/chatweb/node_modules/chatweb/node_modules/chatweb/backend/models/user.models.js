@@ -1,13 +1,14 @@
 import mongoose from "mongoose";
+
 const userSchema=new mongoose.Schema({
     fullName:{
         type:String,
         required:true
     },
-    userName:{
+    username:{
         type:String,
+        required:true,
         unique:true,
-        required:true
     },
     password:{
         type:String,
@@ -17,8 +18,14 @@ const userSchema=new mongoose.Schema({
     gender:{
         type:String,
         required:true,
-        enum:["male","female"];
+        enum:["male","female"]
     },
-});
+    profilePic:{
+        type:String,
+        default:"",
+    },
+},{timestamps:true});
 const User=mongoose.model("User",userSchema);
+console.log(User.collection.name);  // Outputs: 'users'
+
 export default User;
