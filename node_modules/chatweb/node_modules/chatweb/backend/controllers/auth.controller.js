@@ -3,6 +3,8 @@ import User from "../models/user.models.js";
 import generateTokenAndSetCookie from "../utils/generateTokens.js";
 export const signup=async (req,res)=>{
     try{
+        console.log("Enterinig Backend");
+        console.log("JWT Secret:", process.env.JWT_SECRET);
         const {fullName,username,password,confirmPassword,gender}=req.body; 
         if(password!==confirmPassword)
         {
@@ -50,29 +52,65 @@ export const signup=async (req,res)=>{
         res.status(500).json({error:"Internals Server Error"});
     }
 };
-export const login=async (req,res)=>{
-    try{
-        const {username,password}=req.body;
-        const user=await User.findOne({username});
-        const isPasswordCorrect= await bcrypt.compare(password,user?.password || "");
-        if(!user || !isPasswordCorrect)
-        {
-            return res.status(400).json({error:"Invalid username or password"});
+// export const login=async (req,res)=>{
+//     try{
+//         const {username,password}=req.body;
+//         const user=await User.findOne({username});
+//         const isPasswordCorrect= await bcrypt.compare(password,user?.password || "");
+//         if(!user || !isPasswordCorrect)
+//         {
+//             return res.status(400).json({error:"Invalid username or password"});
+//         }
+//         generateTokenAndSetCookie(user._id,res);
+//         res.status(201).json({
+//             _id:user._id,
+//             fullName:user.fullName, 
+//             username:user.username,
+//             profilePic:user.profilePic 
+//         })
+//     }
+//     catch(error)
+//     {
+//         console.error("Error in login:", error.message);
+//         console.error("Error in login:", error);
+//         res.status(500).json({ error: "Internal Server Error" });
+//     }
+// }
+export const login = async (req, res) => {
+    console.log("Received login request:", req.body);
+    try {
+        const { username, password } = req.body;
+
+        if (!username || !password) {
+            return res.status(400).json({ error: "Username and password are required" });
         }
-        generateTokenAndSetCookie(user._id,res);
+
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(400).json({ error: "Invalid username or password" });
+        }
+
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordCorrect) {
+            return res.status(400).json({ error: "Invalid username or password" });
+        }
+
+        generateTokenAndSetCookie(user._id, res);
+
         res.status(201).json({
-            _id:user._id,
-            fullName:user.fullName, 
-            username:user.username,
-            profilePic:user.profilePic 
-        })
-    }
-    catch(error)
-    {
+            _id: user._id,
+            fullName: user.fullName,
+            username: user.username,
+            profilePic: user.profilePic
+        });
+    } catch (error) {
         console.error("Error in login:", error.message);
         res.status(500).json({ error: "Internal Server Error" });
     }
-}
+};
+
 export const logout=async (req,res)=>{
     try {
         res.cookie("jwt","",{maxAge:0});

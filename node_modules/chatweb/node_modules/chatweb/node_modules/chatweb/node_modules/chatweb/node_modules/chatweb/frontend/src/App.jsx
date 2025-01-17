@@ -1,10 +1,22 @@
+
+import Home from "./Pages/home/Home.jsx"
+import { Routes, Route,Navigate } from "react-router-dom";
+import Login from "./Pages/login/Login.jsx"
+import Signup from "./Pages/signup/Signup.jsx"
+import { Toaster } from "react-hot-toast";
+import { useAuthContext } from "./context/AuthContext.jsx";
 function App() {
+  const {authUser} = useAuthContext();
+  console.log("authUser in App:", authUser);
+
   return (
-    <div className="text-center p-4">
-      <h1 className="text-3xl font-bold text-blue-500">Hello, Tailwind CSS!</h1>
-      <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700">
-        Click Me
-      </button>
+    <div className="p-4 h-screen flex items-center justify-center">
+      <Routes>
+        <Route path="/" element={authUser?<Home/>:<Navigate to={"/login"}/>}/>
+        <Route path="/login" element={authUser?<Navigate to="/"/>:<Login/>}/>
+        <Route path="/signup" element={authUser ? <Navigate to="/"/>:<Signup/>}/>
+      </Routes>
+      <Toaster/>
     </div>
   );
 }
