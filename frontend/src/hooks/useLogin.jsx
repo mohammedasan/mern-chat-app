@@ -16,7 +16,7 @@ const useLogin = () => {
         console.log("Going Uselogin"); // Logs when login is being triggered
         setLoading(true);
         try {
-            const res =await fetch("/api/auth/login", {
+            const res =await fetch("https://mern-chat-app-2-d3k2.onrender.com/api/auth/login", {
             method: "POST",
             credentials: "include", // ✅ CRITICAL for cookie to be set
             headers: {

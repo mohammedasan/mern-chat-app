@@ -8,7 +8,7 @@ const useGetConversation = () => {
     const getConversations = async () => {
       setLoading(true);
       try {
-        const res = await fetch("/api/users", {
+        const res = await fetch("https://mern-chat-app-2-d3k2.onrender.com/api/users", {
           method: "GET",
           credentials: "include", // ✅ This sends the cookie (JWT) to the backend
         });
