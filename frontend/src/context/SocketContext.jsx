@@ -13,7 +13,7 @@ export const SocketContextProvider=({children})=>{
     useEffect(()=>{
         if(authUser)
         {
-            const socket=io("http://localhost:8001",{
+            const socket=io("https://howsapp-38jz.onrender.com",{
                 query:{
                     userId:authUser._id,
                 },

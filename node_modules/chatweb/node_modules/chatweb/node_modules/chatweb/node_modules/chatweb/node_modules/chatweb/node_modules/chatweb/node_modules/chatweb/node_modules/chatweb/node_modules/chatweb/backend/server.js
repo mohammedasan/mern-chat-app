@@ -43,38 +43,89 @@
 //   console.log(`Server is running on port ${PORT}`);
 // });
 
+// import express from 'express';
+// import dotenv from 'dotenv';
+// import cors from 'cors';
+// import cookieParser from 'cookie-parser';
+// import path from 'path';
+
+// import authRoutes from "./routes/auth.routes.js";
+// import messageRoutes from "./routes/message.routes.js";
+// import userRoutes from "./routes/user.routes.js";
+// import connectToMongoDB from './db/connectToMongoDB.js';
+
+// dotenv.config();
+
+// const app = express();
+
+// app.use(express.json());
+// app.use(cookieParser());
+
+// // CORS setup
+// const allowedOrigins = [
+//   'http://localhost:3000',
+//   'https://howsapp-38jz.onrender.com' // ✅ Replace with actual frontend Render URL
+// ];
+
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   credentials: true
+// }));
+
+// // Routes
+// app.use('/api/auth', authRoutes);
+// app.use('/api/messages', messageRoutes);
+// app.use('/api/users', userRoutes);
+
+// // Optional: Serve frontend in production
+
+// const PORT = process.env.PORT || 8000;
+// app.listen(PORT, () => {
+//   connectToMongoDB();
+//   console.log(`Server running on port ${PORT}`);
+// });
+
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 
-import authRoutes from "./routes/auth.routes.js";
-import messageRoutes from "./routes/message.routes.js";
-import userRoutes from "./routes/user.routes.js";
+import authRoutes from './routes/auth.routes.js';
+import messageRoutes from './routes/message.routes.js';
+import userRoutes from './routes/user.routes.js';
 import connectToMongoDB from './db/connectToMongoDB.js';
 
 dotenv.config();
 
 const app = express();
+const __dirname = path.resolve();
 
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
 
-// CORS setup
+// ✅ Allowed frontend origins
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://howsapp-38jz.onrender.com' // ✅ Replace with actual frontend Render URL
+  'https://howsapp-38jz.onrender.com'  // Replace with your frontend Render URL
 ];
 
+// ✅ CORS setup
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: allowedOrigins,
+  credentials: true
+}));
+
+// ✅ Handle preflight (OPTIONS) requests
+app.options('*', cors({
+  origin: allowedOrigins,
   credentials: true
 }));
 
@@ -83,8 +134,15 @@ app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/users', userRoutes);
 
-// Optional: Serve frontend in production
+// Optional: Serve frontend in production (only if you plan to serve frontend from backend)
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/dist')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../frontend/dist/index.html'));
+  });
+}
 
+// Server Start
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   connectToMongoDB();
