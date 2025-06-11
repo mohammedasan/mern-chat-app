@@ -14,7 +14,7 @@ const useGetMessages = () => {
               }
             setLoading(true)
             try{
-                const res = await fetch(`/api/messages/${selectedConversation._id}`);
+                const res = await fetch(`https://mern-chat-app-2-d3k2.onrender.com/api/messages/${selectedConversation._id}`);
                 const data = await res.json()
                 if(data.error) throw new Error(data.error)
                     

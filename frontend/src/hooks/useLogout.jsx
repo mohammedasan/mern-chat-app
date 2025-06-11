@@ -6,7 +6,7 @@ const useLogout = () => {
     const { setAuthUser } = useAuthContext();
     const logout = async () => {
         try {
-            const res = await fetch("http://localhost:8001/api/auth/logout",{
+            const res = await fetch("https://mern-chat-app-2-d3k2.onrender.com/api/auth/logout",{
                 method:"POST",
                 headers:{
                     "Content-Type":"application/json"
