@@ -64,7 +64,7 @@ app.use(cookieParser());
 // CORS setup
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://your-frontend.onrender.com' // ✅ Replace with actual frontend Render URL
+  'https://howsapp-38jz.onrender.com' // ✅ Replace with actual frontend Render URL
 ];
 
 app.use(cors({
