@@ -8,8 +8,12 @@ const useGetConversation = () => {
     const getConversations = async () => {
       setLoading(true);
       try {
-        const res = await fetch("/api/users");
+        const res = await fetch("/api/users", {
+          method: "GET",
+          credentials: "include", // ✅ This sends the cookie (JWT) to the backend
+        });
         const data = await res.json();
+        
         if (data.error) {
           throw new Error(data.error);
         }
