@@ -1,53 +1,8 @@
-// import path from "path";
-// import express from "express";
-// import dotenv from "dotenv";
-// import cookieParser from "cookie-parser";
-// import cors from 'cors';
-
-// import authRoutes from "./routes/auth.routes.js";
-// import messageRoutes from "./routes/message.routes.js";
-// import userRoutes from "./routes/user.routes.js";
-
-// import connectToMongoDB from "./db/connectToMongoDB.js";
-// import {app,server} from "./socket/socket.js";
-// // const mongoose = require('mongoose');
-
-// dotenv.config(); // Load environment variables from .env file
-
-// const PORT = process.env.PORT || 8000;
-// const __dirname = path.resolve();
-// // const app = express();
-// app.use(express.json());
-// app.use(cookieParser());
-// // app.use(cors());
-// app.use(cors({
-//   origin: 'http://localhost:3000', // Allow requests from frontend
-//   credentials: true,
-// }));
-// // app.get("/",(req,res)=>
-// // {
-// //     res.send("Hello WorldQss");
-// // });
-// app.use("/api/auth",authRoutes)
-// app.use("/api/messages",messageRoutes)
-// app.use("/api/users",userRoutes)
-
-// app.use(express.static(path.join(__dirname, "/frontend/dist")));
-
-// app.get("*", (req,res)=>{
-//   res.sendFile(path.join(__dirname, "frontend","dist","index.html"));
-// });
-// // Start the server
-// server.listen(PORT, () => {
-//   connectToMongoDB();
-//   console.log(`Server is running on port ${PORT}`);
-// });
 
 // import express from 'express';
 // import dotenv from 'dotenv';
 // import cors from 'cors';
 // import cookieParser from 'cookie-parser';
-// import path from 'path';
 
 // import authRoutes from "./routes/auth.routes.js";
 // import messageRoutes from "./routes/message.routes.js";
@@ -58,13 +13,14 @@
 
 // const app = express();
 
+// // Middleware
 // app.use(express.json());
 // app.use(cookieParser());
 
-// // CORS setup
+// // CORS setup for frontend domain
 // const allowedOrigins = [
 //   'http://localhost:3000',
-//   'https://howsapp-38jz.onrender.com' // ✅ Replace with actual frontend Render URL
+//   'https://howsapp-38jz.onrender.com' // ✅ Your deployed frontend
 // ];
 
 // app.use(cors({
@@ -83,56 +39,74 @@
 // app.use('/api/messages', messageRoutes);
 // app.use('/api/users', userRoutes);
 
-// // Optional: Serve frontend in production
-
+// // Start server
 // const PORT = process.env.PORT || 8000;
 // app.listen(PORT, () => {
 //   connectToMongoDB();
 //   console.log(`Server running on port ${PORT}`);
 // });
+
 import express from 'express';
-import dotenv from 'dotenv';
+import http from 'http';
+import { Server } from 'socket.io';
 import cors from 'cors';
+import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 
-import authRoutes from "./routes/auth.routes.js";
-import messageRoutes from "./routes/message.routes.js";
-import userRoutes from "./routes/user.routes.js";
 import connectToMongoDB from './db/connectToMongoDB.js';
+import authRoutes from './routes/auth.routes.js';
+import messageRoutes from './routes/message.routes.js';
+import userRoutes from './routes/user.routes.js';
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app); // ✅ create server explicitly
 
-// Middleware
+const io = new Server(server, {
+  cors: {
+    origin: ['http://localhost:3000', 'https://howsapp-38jz.onrender.com'],
+    credentials: true,
+  },
+});
+
 app.use(express.json());
 app.use(cookieParser());
 
-// CORS setup for frontend domain
-const allowedOrigins = [
-  'http://localhost:3000',
-  'https://howsapp-38jz.onrender.com' // ✅ Your deployed frontend
-];
-
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
+  origin: ['http://localhost:3000', 'https://howsapp-38jz.onrender.com'],
+  credentials: true,
 }));
 
-// Routes
+// ✅ REST API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/users', userRoutes);
 
-// Start server
+// ✅ SOCKET.IO setup
+const onlineUsers = new Map();
+
+io.on("connection", (socket) => {
+  const userId = socket.handshake.query.userId;
+  if (userId) {
+    onlineUsers.set(userId, socket.id);
+    io.emit("getOnlineUsers", [...onlineUsers.keys()]);
+  }
+
+  socket.on("disconnect", () => {
+    for (let [key, value] of onlineUsers.entries()) {
+      if (value === socket.id) {
+        onlineUsers.delete(key);
+        break;
+      }
+    }
+    io.emit("getOnlineUsers", [...onlineUsers.keys()]);
+  });
+});
+
+// ✅ Connect DB and start server
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   connectToMongoDB();
   console.log(`Server running on port ${PORT}`);
 });
