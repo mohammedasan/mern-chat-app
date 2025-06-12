@@ -47,13 +47,13 @@
 // });
 
 import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import mongoose from 'mongoose';
 import http from 'http';
 import { Server } from 'socket.io';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import cookieParser from 'cookie-parser';
 
-import connectToMongoDB from './db/connectToMongoDB.js';
 import authRoutes from './routes/auth.routes.js';
 import messageRoutes from './routes/message.routes.js';
 import userRoutes from './routes/user.routes.js';
@@ -61,29 +61,14 @@ import userRoutes from './routes/user.routes.js';
 dotenv.config();
 
 const app = express();
-const server = http.createServer(app); // ✅ create server explicitly
-
+const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:3000', 'https://howsapp-38jz.onrender.com'],
+    origin: ["https://your-frontend-domain.com", "http://localhost:5173"],
     credentials: true,
   },
 });
 
-app.use(express.json());
-app.use(cookieParser());
-
-app.use(cors({
-  origin: ['http://localhost:3000', 'https://howsapp-38jz.onrender.com'],
-  credentials: true,
-}));
-
-// ✅ REST API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/users', userRoutes);
-
-// ✅ SOCKET.IO setup
 const onlineUsers = new Map();
 
 io.on("connection", (socket) => {
@@ -92,6 +77,13 @@ io.on("connection", (socket) => {
     onlineUsers.set(userId, socket.id);
     io.emit("getOnlineUsers", [...onlineUsers.keys()]);
   }
+
+  socket.on("sendMessage", ({ to, from, message }) => {
+    const receiverSocket = onlineUsers.get(to);
+    if (receiverSocket) {
+      io.to(receiverSocket).emit("newMessage", message);
+    }
+  });
 
   socket.on("disconnect", () => {
     for (let [key, value] of onlineUsers.entries()) {
@@ -104,9 +96,17 @@ io.on("connection", (socket) => {
   });
 });
 
-// ✅ Connect DB and start server
-const PORT = process.env.PORT || 8000;
-server.listen(PORT, () => {
-  connectToMongoDB();
-  console.log(`Server running on port ${PORT}`);
+app.use(cors({ origin: ["https://your-frontend-domain.com", "http://localhost:5173"], credentials: true }));
+app.use(express.json());
+app.use(cookieParser());
+
+app.use("/api/auth", authRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/users", userRoutes);
+
+mongoose.connect(process.env.MONGO_DB_URI).then(() => {
+  console.log("Connected to MongoDB");
+  server.listen(process.env.PORT || 8000, () => {
+    console.log("Server is running on port", process.env.PORT || 8000);
+  });
 });
