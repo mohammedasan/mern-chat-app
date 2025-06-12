@@ -1,7 +1,8 @@
-// ✅ FILE: frontend/context/SocketContext.jsx
-import { createContext, useContext, useEffect, useState } from 'react';
-import { useAuthContext } from './AuthContext';
-import io from 'socket.io-client';
+// src/context/SocketContext.jsx
+
+import { createContext, useContext, useEffect, useState } from "react";
+import { useAuthContext } from "./AuthContext";
+import io from "socket.io-client";
 
 const SocketContext = createContext();
 export const useSocketContext = () => useContext(SocketContext);
@@ -13,21 +14,30 @@ export const SocketContextProvider = ({ children }) => {
 
   useEffect(() => {
     if (authUser) {
+      // ✅ Connect to backend Socket.IO server with userId
       const socketInstance = io("https://mern-chat-app-2-d3k2.onrender.com", {
-        query: {
-          userId: authUser._id
-        }
+        query: { userId: authUser._id },
+        withCredentials: true, // ✅ Important for cookies (auth)
       });
+
       setSocket(socketInstance);
 
+      // ✅ Listen for online users
       socketInstance.on("getOnlineUsers", (users) => {
         setOnlineUsers(users);
       });
 
-      return () => socketInstance.close();
+      // ✅ Clean up on unmount or logout
+      return () => {
+        socketInstance.close();
+        setSocket(null);
+      };
     } else {
-      if (socket) socket.close();
-      setSocket(null);
+      // If not logged in, ensure no lingering socket
+      if (socket) {
+        socket.close();
+        setSocket(null);
+      }
     }
   }, [authUser]);
 
