@@ -13,14 +13,15 @@ export const SocketContextProvider=({children})=>{
     useEffect(()=>{
         if(authUser)
         {
-            const socket=io("https://howsapp-38jz.onrender.com",{
+            const socket=io("https://mern-chat-app-2-d3k2.onrender.com",{
                 query:{
                     userId:authUser._id,
+                    withCredentials: true,
                 },
             });
             setSocket(socket);
             socket.on("getOnlineUsers",(users)=>{
-                setOnlineUsers(users);
+                setOnlineUsers(users);  
             });
             return ()=>socket.close();
         }
