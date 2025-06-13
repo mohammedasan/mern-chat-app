@@ -1,33 +1,49 @@
-const http = require("http");
-const socketIo = require("socket.io");
-const express = require("express");
-const cors = require("cors");
+// ✅ server.js
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
+import cors from "cors";
 
 const app = express();
+
 const server = http.createServer(app);
-const io = socketIo(server, {
+
+const io = new Server(server, {
   cors: {
-    origin: ["https://howsapp-38jz.onrender.com"], // your frontend URL
+    origin: ["https://howsapp-38jz.onrender.com"],
     credentials: true,
   },
 });
 
+// Middleware
+app.use(cors({ origin: "https://howsapp-38jz.onrender.com", credentials: true }));
+app.use(express.json());
+
+// Socket.io connection
 io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
-  console.log(`User connected: ${userId}`);
+  console.log("User connected:", userId);
 
   socket.join(userId);
 
   socket.on("newMessage", (message) => {
     const receiverId = message.receiverId;
-    // Send message to receiver's room
     io.to(receiverId).emit("newMessage", message);
   });
 
   socket.on("disconnect", () => {
-    console.log(`User disconnected: ${userId}`);
+    console.log("User disconnected:", userId);
   });
 });
+
+// API routes (optional)
+app.get("/", (req, res) => {
+  res.send("Socket.IO server is running");
+});
+
+// Start server
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 // import express from "express";
 // import dotenv from "dotenv";
