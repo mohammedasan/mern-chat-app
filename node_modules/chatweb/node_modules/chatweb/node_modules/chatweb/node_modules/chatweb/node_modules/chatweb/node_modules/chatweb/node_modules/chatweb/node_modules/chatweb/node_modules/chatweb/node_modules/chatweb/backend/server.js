@@ -4,9 +4,9 @@ import cors from "cors";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
 
-import authRoutes from "./routes/auth.js";
-import messageRoutes from "./routes/messages.js";
-import userRoutes from "./routes/users.js";
+import authRoutes from "./routes/auth.routes.js";
+import messageRoutes from "./routes/message.routes.js";
+import userRoutes from "./routes/user.routes.js";
 
 dotenv.config();
 
