@@ -1,7 +1,7 @@
-// ✅ FILE: frontend/hooks/useGetMessages.jsx
 import { useEffect, useState } from "react";
 import useConversation from "../zustand/useConversation";
 import { useSocketContext } from "../context/SocketContext";
+import toast from "react-hot-toast";
 
 const useGetMessages = () => {
   const [loading, setLoading] = useState(false);
@@ -10,37 +10,41 @@ const useGetMessages = () => {
 
   useEffect(() => {
     const getMessages = async () => {
-      if (!selectedConversation?._id) return setMessages([]);
+      if (!selectedConversation?._id) {
+        setMessages([]);
+        return;
+      }
+
       setLoading(true);
-
       try {
-        const res = await fetch(`https://mern-chat-app-2-d3k2.onrender.com/api/messages/${selectedConversation._id}`, {
-          credentials: "include"
-        });
+        const res = await fetch(
+          `https://mern-chat-app-2-d3k2.onrender.com/api/messages/${selectedConversation._id}`,
+          {
+            credentials: "include",
+          }
+        );
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-
+        if (data.error) throw new Error(data.error);
         setMessages(data);
-      } catch (err) {
-        console.error("Error loading messages:", err.message);
+      } catch (error) {
+        toast.error(error.message);
       } finally {
         setLoading(false);
       }
     };
-
     getMessages();
-    return () => setMessages([]);
-  }, [selectedConversation?._id]);
 
-  useEffect(() => {
-    // ✅ Listen for new messages
-    socket?.on("newMessage", (newMsg) => {
-      if (newMsg.senderId === selectedConversation?._id)
-        setMessages((prev) => [...prev, newMsg]);
+    // ✅ Listen for real-time new messages
+    socket?.on("newMessage", (newMessage) => {
+      if (newMessage.senderId === selectedConversation._id || newMessage.receiverId === selectedConversation._id) {
+        setMessages((prev) => [...prev, newMessage]);
+      }
     });
 
-    return () => socket?.off("newMessage");
-  }, [socket, selectedConversation?._id]);
+    return () => {
+      socket?.off("newMessage");
+    };
+  }, [selectedConversation?._id, setMessages, socket]);
 
   return { messages, loading };
 };
