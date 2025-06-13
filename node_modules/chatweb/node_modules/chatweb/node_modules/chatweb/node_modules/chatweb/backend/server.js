@@ -1,72 +1,57 @@
 // backend/server.js
 import express from "express";
 import dotenv from "dotenv";
-import mongoose from "mongoose";
-import cookieParser from "cookie-parser";
 import cors from "cors";
-import authRoutes from "./routes/auth.routes.js";
+import cookieParser from "cookie-parser";
+import connectToMongoDB from "./db/connectToMongoDB.js";
 import userRoutes from "./routes/user.routes.js";
-import messageRoutes from "./routes/message.routes.js";
+import authRoutes from "./routes/auth.routes.js";
+import messageRoutes from "./routes/messages.routes.js";
 import { Server } from "socket.io";
 import http from "http";
-import path from "path";
 
+// Load .env first!
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
 
-// Middleware
+// Middlewares
 app.use(cors({
-  origin: ["https://howsapp-38jz.onrender.com"], // your frontend URL
+  origin: "https://howsapp-38jz.onrender.com", // frontend URL
   credentials: true
 }));
-app.use(cookieParser());
 app.use(express.json());
+app.use(cookieParser());
+
+// Connect DB
+connectToMongoDB();
 
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/messages", messageRoutes);
 
-// Static Frontend Serving (Optional if you're also deploying frontend separately)
-const __dirname = path.resolve();
-app.use(express.static(path.join(__dirname, "/frontend/dist")));
-app.get("*", (req, res) =>
-  res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"))
-);
+// Start server
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 
-// Socket.io
+// Socket.io setup
 const io = new Server(server, {
   cors: {
-    origin: "https://howsapp-38jz.onrender.com", // frontend
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
+    origin: "https://howsapp-38jz.onrender.com",
+    credentials: true
+  }
 });
 
 io.on("connection", (socket) => {
-  const userId = socket.handshake.query.userId;
-  console.log("User connected:", userId);
-  socket.join(userId);
+  console.log("🔥 New socket connected", socket.id);
 
-  socket.on("sendMessage", ({ senderId, receiverId, message }) => {
-    io.to(receiverId).emit("newMessage", { senderId, message });
+  socket.on("sendMessage", (message) => {
+    socket.broadcast.emit("receiveMessage", message);
   });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected:", userId);
+    console.log("❌ Socket disconnected", socket.id);
   });
 });
-
-// Database Connection and Start Server
-const PORT = process.env.PORT || 5000;
-
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("MongoDB connected");
-    server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch((err) => {
-    console.error("MongoDB connection failed:", err.message);
-  });
